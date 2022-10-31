@@ -1,7 +1,7 @@
 /**
 * This file is part of ORB-SLAM3
 *
-* Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+* Copyright (C) 2017-2020 Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
 * Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
 *
 * ORB-SLAM3 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -23,12 +23,9 @@
 #include<chrono>
 
 #include<ros/ros.h>
-#include<cv_bridge/cv_bridge.h>
-
-#include <Eigen/Core>
+#include <cv_bridge/cv_bridge.h>
 
 #include<opencv2/core/core.hpp>
-#include<opencv2/core/eigen.hpp>
 #include<opencv2/imgproc/imgproc.hpp>
 
 #include"../../../include/System.h"
@@ -151,10 +148,7 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr& msg)
     }
     cv::Mat im = cv_ptr->image.clone();
     cv::Mat imu;
-    cv::Mat Tcw;
-    Sophus::SE3f Tcw_SE3f = mpSLAM->TrackMonocular(cv_ptr->image,cv_ptr->header.stamp.toSec());
-    Eigen::Matrix4f Tcw_Matrix = Tcw_SE3f.matrix();
-    cv::eigen2cv(Tcw_Matrix, Tcw);
+    cv::Mat Tcw = mpSLAM->TrackMonocular(cv_ptr->image,cv_ptr->header.stamp.toSec());
     int state = mpSLAM->GetTrackingState();
     vector<ORB_SLAM3::MapPoint*> vMPs = mpSLAM->GetTrackedMapPoints();
     vector<cv::KeyPoint> vKeys = mpSLAM->GetTrackedKeyPointsUn();
