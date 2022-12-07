@@ -511,7 +511,7 @@ void System::SaveTrajectoryEuRoC(const string &filename)
     }*/
 
     vector<Map*> vpMaps = mpAtlas->GetAllMaps();
-    Map* pBiggerMap = nullptr;
+    Map* pBiggerMap;
     int numMaxKFs = 0;
     for(Map* pMap :vpMaps)
     {
