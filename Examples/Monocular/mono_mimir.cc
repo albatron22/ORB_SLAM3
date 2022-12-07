@@ -176,8 +176,8 @@ int main(int argc, char **argv)
         {
             string kf_file_submap =  "./SubMaps/kf_SubMap_" + std::to_string(seq) + ".txt";
             string f_file_submap =  "./SubMaps/f_SubMap_" + std::to_string(seq) + ".txt";
-            SLAM.SaveTrajectoryMimir(f_file_submap);
-            SLAM.SaveKeyFrameTrajectoryMimir(kf_file_submap);
+            SLAM.SaveTrajectoryTUM(f_file_submap);
+            SLAM.SaveKeyFrameTrajectoryTUM(kf_file_submap);
 
             cout << "Changing the dataset" << endl;
 
@@ -193,13 +193,13 @@ int main(int argc, char **argv)
     {
         const string kf_file =  "kf_" + string(argv[argc-1]) + ".txt";
         const string f_file =  "f_" + string(argv[argc-1]) + ".txt";
-        SLAM.SaveTrajectoryMimir(f_file);
-        SLAM.SaveKeyFrameTrajectoryMimir(kf_file);
+        SLAM.SaveTrajectoryTUM(f_file);
+        SLAM.SaveKeyFrameTrajectoryTUM(kf_file);
     }
     else
     {
-        SLAM.SaveTrajectoryMimir("CameraTrajectory.txt");
-        SLAM.SaveKeyFrameTrajectoryMimir("KeyFrameTrajectory.txt");
+        SLAM.SaveTrajectoryTUM("CameraTrajectory.txt");
+        SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
     }
 
     return 0;

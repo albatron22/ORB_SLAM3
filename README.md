@@ -1,168 +1,6 @@
-# Installation
-I got some useful informations from this website before create this project. Thanks to author! 
-[url](https://github.com/Mauhing/ORB_SLAM3/blob/master/README.md)
-
-## Modification
-
-### Error1:
-
-```
-In file included from /usr/local/include/pangolin/utils/signal_slot.h:3,
-                 from /usr/local/include/pangolin/windowing/window.h:35,
-                 from /usr/local/include/pangolin/display/display.h:34,
-                 from /usr/local/include/pangolin/pangolin.h:38,
-                 from /home/a616708946/slambook/ch5/code/disparity.cpp:8:
-/usr/local/include/sigslot/signal.hpp:109:79: error: ‘decay_t’ is not a member of ‘std’; did you mean ‘decay’?
-  109 | constexpr bool is_weak_ptr_compatible_v = detail::is_weak_ptr_compatible<std::decay_t<P>>::value;
-      |                                                                               ^~~~~~~
-      |                                                                               decay
-/usr/local/include/sigslot/signal.hpp:109:79: error: ‘decay_t’ is not a member of ‘std’; did you mean ‘decay’?
-  109 | constexpr bool is_weak_ptr_compatible_v = detail::is_weak_ptr_compatible<std::decay_t<P>>::value;
-      |                                                                               ^~~~~~~
-      |                                                                               decay
-/usr/local/include/sigslot/signal.hpp:109:87: error: template argument 1 is invalid
-  109 | constexpr bool is_weak_ptr_compatible_v = detail::is_weak_ptr_compatible<std::decay_t<P>>::value;
-```
-
-update Cmakelists.txt from -std=c++11 to -std=c++14
-
-```
-CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-   add_definitions(-DCOMPILEDWITHC11)
-   message(STATUS "Using flag -std=c++14.")
-elseif(COMPILER_SUPPORTS_CXX0X)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-   add_definitions(-DCOMPILEDWITHC0X)
-   message(STATUS "Using flag -std=c++0x.")
-else()
-   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif()
-```
-
-## error2
-
-This is an error due to the Eigen version.
-
-```
-   ../core/base_edge.h: 33:10: fatal error: Eigen/Core: No such file or directory 
-#include <Eigen/Core>
-
-```
-
-Replace all of #include <Eigen/(any packages)> to #include <eigen3/Eigen/(any packages)>
-
-For example:
-
-```
-#include <Eigen/Core>
-to
-#include <eigen3/Eigen/Core>
-
-```
-
-
-
-# 1. Installation of ORB-SLAM 3 on a fresh installed Ubuntu 20.04
-Install all liberay dependencies.
-
-```
-
-sudo add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main"
-sudo apt update
-
-sudo apt-get install build-essential
-sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
-
-sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev libjasper-dev
-
-sudo apt-get install libglew-dev libboost-all-dev libssl-dev
-
-sudo apt install libeigen3-dev
-```
-
-# Install OpenCV 3.2.0
-The ORB-SLAM 3 was test by
-```
-cd ~
-mkdir Dev && cd Dev
-git clone https://github.com/opencv/opencv.git
-cd opencv
-git checkout 3.2.0
-```
-
-Put the following at the top of header file 
-
-```
-gedit ./modules/videoio/src/cap_ffmpeg_impl.hpp
-#define AV_CODEC_FLAG_GLOBAL_HEADER (1 << 22)
-#define CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
-#define AVFMT_RAWPICTURE 0x0020
-```
-
-and save and close the file
-
-```
-mkdir build
-cd build
-cmake -D CMAKE_BUILD_TYPE=Release -D WITH_CUDA=OFF -D CMAKE_INSTALL_PREFIX=/usr/local ..
-make -j 3
-sudo make install
-
-```
-
-# Install Pangolin
-Now, we install the Pangolin. I used the commit version 86eb4975fc4fc8b5d92148c2e370045ae9bf9f5d
-
-
-```
-cd ~/Dev
-git clone https://github.com/stevenlovegrove/Pangolin.git
-cd Pangolin 
-mkdir build 
-cd build 
-cmake .. -D CMAKE_BUILD_TYPE=Release 
-make -j 3 
-sudo make install
-
-```
-
-# ORB-SLAM 3
-Now, we install ORB-SLAM3. I used the commit version ef9784101fbd28506b52f233315541ef8ba7af57 tag: v0.3-beta
-
-```
-cd ~/Dev
-git clone https://github.com/UZ-SLAMLab/ORB_SLAM3.git 
-cd ORB_SLAM3
-
-```
-
-We need to change the header file gedit ./include/LoopClosing.h at line 51
-from
-```
-Eigen::aligned_allocator<std::pair<const KeyFrame*, g2o::Sim3> > > KeyFrameAndPose;
-```
-to
-```
-Eigen::aligned_allocator<std::pair<KeyFrame *const, g2o::Sim3> > > KeyFrameAndPose; 
-```
-in order to make this comiple.
-Now, we can comiple ORB-SLAM3 and it dependencies as DBoW2 and g2o.
-
-Now Simply just run (if you encounter compiler, try to run the this shell script 2 or 3 more time. It works for me.)
-
-```
-./build.sh
-
-```
-
-
-
 # ORB-SLAM3
 
-### V0.4: Beta version, 21 April 2021
+### V1.0, December 22th, 2021
 **Authors:** Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, [José M. M. Montiel](http://webdiis.unizar.es/~josemari/), [Juan D. Tardos](http://webdiis.unizar.es/~jdtardos/).
 
 The [Changelog](https://github.com/UZ-SLAMLab/ORB_SLAM3/blob/master/Changelog.md) describes the features of each version.
@@ -178,7 +16,7 @@ alt="ORB-SLAM3" width="240" height="180" border="10" /></a>
 
 ### Related Publications:
 
-[ORB-SLAM3] Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M. M. Montiel and Juan D. Tardós, **ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial and Multi-Map SLAM**, *IEEE Transactions on Robotics, 2021* **[PDF](https://arxiv.org/abs/2007.11898)**.
+[ORB-SLAM3] Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M. M. Montiel and Juan D. Tardós, **ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial and Multi-Map SLAM**, *IEEE Transactions on Robotics 37(6):1874-1890, Dec. 2021*. **[PDF](https://arxiv.org/abs/2007.11898)**.
 
 [IMU-Initialization] Carlos Campos, J. M. M. Montiel and Juan D. Tardós, **Inertial-Only Optimization for Visual-Inertial Initialization**, *ICRA 2020*. **[PDF](https://arxiv.org/pdf/2003.05766.pdf)**
 
@@ -199,14 +37,17 @@ ORB-SLAM3 is released under [GPLv3 license](https://github.com/UZ-SLAMLab/ORB_SL
 For a closed-source version of ORB-SLAM3 for commercial purposes, please contact the authors: orbslam (at) unizar (dot) es.
 
 If you use ORB-SLAM3 in an academic work, please cite:
-
-    @article{ORBSLAM3_2020,
+  
+    @article{ORBSLAM3_TRO,
       title={{ORB-SLAM3}: An Accurate Open-Source Library for Visual, Visual-Inertial 
                and Multi-Map {SLAM}},
       author={Campos, Carlos AND Elvira, Richard AND G\´omez, Juan J. AND Montiel, 
               Jos\'e M. M. AND Tard\'os, Juan D.},
-      journal={arXiv preprint arXiv:2007.11898},
-      year={2020}
+      journal={IEEE Transactions on Robotics}, 
+      volume={37},
+      number={6},
+      pages={1874-1890},
+      year={2021}
      }
 
 # 2. Prerequisites
@@ -219,7 +60,7 @@ We use the new thread and chrono functionalities of C++11.
 We use [Pangolin](https://github.com/stevenlovegrove/Pangolin) for visualization and user interface. Dowload and install instructions can be found at: https://github.com/stevenlovegrove/Pangolin.
 
 ## OpenCV
-We use [OpenCV](http://opencv.org) to manipulate images and features. Dowload and install instructions can be found at: http://opencv.org. **Required at leat 3.0. Tested with OpenCV 3.2.0**.
+We use [OpenCV](http://opencv.org) to manipulate images and features. Dowload and install instructions can be found at: http://opencv.org. **Required at leat 3.0. Tested with OpenCV 3.2.0 and 4.4.0**.
 
 ## Eigen3
 Required by g2o (see below). Download and install instructions can be found at: http://eigen.tuxfamily.org. **Required at least 3.1.0**.
@@ -254,7 +95,23 @@ chmod +x build.sh
 
 This will create **libORB_SLAM3.so**  at *lib* folder and the executables in *Examples* folder.
 
-# 4. EuRoC Examples
+# 4. Running ORB-SLAM3 with your camera
+
+Directory `Examples` contains several demo programs and calibration files to run ORB-SLAM3 in all sensor configurations with Intel Realsense cameras T265 and D435i. The steps needed to use your own camera are: 
+
+1. Calibrate your camera following `Calibration_Tutorial.pdf` and write your calibration file `your_camera.yaml`
+
+2. Modify one of the provided demos to suit your specific camera model, and build it
+
+3. Connect the camera to your computer using USB3 or the appropriate interface
+
+4. Run ORB-SLAM3. For example, for our D435i camera, we would execute:
+
+```
+./Examples/Stereo-Inertial/stereo_inertial_realsense_D435i Vocabulary/ORBvoc.txt ./Examples/Stereo-Inertial/RealSense_D435i.yaml
+```
+
+# 5. EuRoC Examples
 [EuRoC dataset](http://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets) was recorded with two pinhole cameras and an inertial sensor. We provide an example script to launch EuRoC sequences in all the sensor configurations.
 
 1. Download a sequence (ASL format) from http://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets
@@ -274,7 +131,7 @@ Execute the following script to process sequences and compute the RMS ATE:
 ./euroc_eval_examples
 ```
 
-# 5. TUM-VI Examples
+# 6. TUM-VI Examples
 [TUM-VI dataset](https://vision.in.tum.de/data/datasets/visual-inertial-dataset) was recorded with two fisheye cameras and an inertial sensor.
 
 1. Download a sequence from https://vision.in.tum.de/data/datasets/visual-inertial-dataset and uncompress it.
@@ -294,7 +151,7 @@ Execute the following script to process sequences and compute the RMS ATE:
 ./tum_vi_eval_examples
 ```
 
-# 6. ROS Examples
+# 7. ROS Examples
 
 ### Building the nodes for mono, mono-inertial, stereo, stereo-inertial and RGB-D
 Tested with ROS Melodic and ubuntu 18.04.
@@ -371,6 +228,8 @@ Once ORB-SLAM3 has loaded the vocabulary, press space in the rosbag tab.
   rosrun rosbag fastrebag.py dataset-room1_512_16.bag dataset-room1_512_16_small_chunks.bag
   ```
 
-# 7. Time analysis
+# 8. Running time analysis
 A flag in `include\Config.h` activates time measurements. It is necessary to uncomment the line `#define REGISTER_TIMES` to obtain the time stats of one execution which is shown at the terminal and stored in a text file(`ExecTimeMean.txt`).
 
+# 9. Calibration
+You can find a tutorial for visual-inertial calibration and a detailed description of the contents of valid configuration files at  `Calibration_Tutorial.pdf`

@@ -34,19 +34,21 @@ void LoadImages(const string &strFile, vector<string> &vstrImageFilenames,
 
 int main(int argc, char **argv)
 {
-    if(argc != 4)
+    if(argc != 5)
     {
-        cerr << endl << "Usage: ./mono_tum path_to_vocabulary path_to_settings path_to_sequence number_of_seq" << endl;
+        cerr << endl << "Usage: ./mono_aqualoc path_to_vocabulary path_to_settings path_to_sequence number_of_seq" << endl;
         return 1;
     }
 
     // Retrieve paths to images
     vector<string> vstrImageFilenames;
     vector<double> vTimestamps;
-    string strFile = string(argv[3])+"archaeo_sequence_"+string(argv[4])+"_raw_data/raw_data/img_sequence_"+string(argv[4])+".csv";
+    string strFile = string(argv[3])+"/raw_data/img_sequence_"+string(argv[4])+".csv";
     LoadImages(strFile, vstrImageFilenames, vTimestamps);
 
+
     int nImages = vstrImageFilenames.size();
+    cout << nImages << endl;
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::MONOCULAR,true);
@@ -60,13 +62,14 @@ int main(int argc, char **argv)
     for(int ni=0; ni<nImages; ni++)
     {
         // Read image from file
-        im = cv::imread(string(argv[3])+"/images_sequence_"+string(argv[4])+vstrImageFilenames[ni],cv::IMREAD_UNCHANGED);
+        im = cv::imread(string(argv[3])+"/raw_data/images_sequence_"+string(argv[4])+"/"+vstrImageFilenames[ni],cv::IMREAD_UNCHANGED);
+        
         double tframe = vTimestamps[ni];
 
         if(im.empty())
         {
             cerr << endl << "Failed to load image at: "
-                 << string(argv[3]) << "/images_sequence_"<< string(argv[4]) << vstrImageFilenames[ni] << endl;
+                 << string(argv[3]) << "/raw_data/images_sequence_"<< string(argv[4])<<"/" << vstrImageFilenames[ni] << endl;
             return 1;
         }
 
@@ -125,26 +128,30 @@ void LoadImages(const string &strFile, vector<string> &vstrImageFilenames, vecto
     ifstream f;
     f.open(strFile.c_str());
 
-    // skip first three lines
+    // skip first line
     string s0;
-    getline(f,s0);
-    getline(f,s0);
-    getline(f,s0);
+    getline(f,s0,',');
+    getline(f,s0,',');
 
     while(!f.eof())
     {
         string s;
-        getline(f,s);
+        getline(f,s,',');
         if(!s.empty())
         {
             stringstream ss;
             ss << s;
+
             double t;
             string sRGB;
-            ss >> t;
-            vTimestamps.push_back(t);
+
             ss >> sRGB;
+            ss >> t;         
+
+            vTimestamps.push_back(t/1e9d);            
             vstrImageFilenames.push_back(sRGB);
+
+
         }
     }
 }
